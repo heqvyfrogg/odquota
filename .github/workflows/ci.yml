@@ -84,7 +84,9 @@ jobs:
           chmod +x "${{ matrix.artifact }}"
           mkdir -p dist
           tar -czf "dist/${{ matrix.archive }}" -C . "${{ matrix.artifact }}" README.md LICENSE
-          sha256sum "dist/${{ matrix.archive }}" > "dist/${{ matrix.archive }}.sha256"
+          # Record the checksum against the archive name alone, so a reader can
+          # run `sha256sum -c` from the download directory without editing it.
+          (cd dist && sha256sum "${{ matrix.archive }}" > "${{ matrix.archive }}.sha256")
       - name: Package (windows)
         if: runner.os == 'Windows'
         shell: pwsh
