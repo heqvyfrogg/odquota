@@ -109,6 +109,10 @@ jobs:
     permissions:
       contents: write
     steps:
+      # The notes file lives in the repo, so the job must check it out; without
+      # this step body_path silently resolves to nothing and the release ships
+      # with an empty body.
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           path: dist
