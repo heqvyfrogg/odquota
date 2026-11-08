@@ -40,8 +40,7 @@ fn sample_entry(label: &str, control: &str) -> AccountEntry {
 fn save_and_load_roundtrip() {
     let home = temp_home("roundtrip");
     use_test_passphrase();
-    std::env::set_var("ODQUOTA_HOME", &home);
-    let store = Store::resolve().expect("resolve store");
+    let store = Store::with_path(home.join("accounts.dat"));
 
     let mut doc = StoreDocument::default();
     doc.accounts
@@ -65,8 +64,7 @@ fn save_and_load_roundtrip() {
 fn missing_store_yields_empty_document() {
     let home = temp_home("empty");
     use_test_passphrase();
-    std::env::set_var("ODQUOTA_HOME", &home);
-    let store = Store::resolve().expect("resolve store");
+    let store = Store::with_path(home.join("accounts.dat"));
     let doc = store.load().expect("missing file is not an error");
     assert_eq!(doc.accounts.len(), 0);
     let _ = fs::remove_dir_all(&home);
@@ -76,8 +74,7 @@ fn missing_store_yields_empty_document() {
 fn credentials_never_appear_in_plaintext_on_disk() {
     let home = temp_home("plaintext");
     use_test_passphrase();
-    std::env::set_var("ODQUOTA_HOME", &home);
-    let store = Store::resolve().expect("resolve store");
+    let store = Store::with_path(home.join("accounts.dat"));
 
     let control = "vela_ctrl_SECRETPROBE0001";
     let runtime = "sk-amr-SECRETPROBE0002";
@@ -112,8 +109,7 @@ fn credentials_never_appear_in_plaintext_on_disk() {
 fn save_replaces_atomically_without_leftover_temp_files() {
     let home = temp_home("atomic");
     use_test_passphrase();
-    std::env::set_var("ODQUOTA_HOME", &home);
-    let store = Store::resolve().expect("resolve store");
+    let store = Store::with_path(home.join("accounts.dat"));
 
     let mut doc = StoreDocument::default();
     doc.accounts.push(sample_entry("first", "vela_ctrl_FIRST"));
@@ -144,8 +140,7 @@ fn save_replaces_atomically_without_leftover_temp_files() {
 fn corrupted_store_is_reported_not_silently_ignored() {
     let home = temp_home("corrupt");
     use_test_passphrase();
-    std::env::set_var("ODQUOTA_HOME", &home);
-    let store = Store::resolve().expect("resolve store");
+    let store = Store::with_path(home.join("accounts.dat"));
     fs::write(store.path(), b"this is not a store").expect("write garbage");
 
     let err = store.load().expect_err("must report corruption");
@@ -163,8 +158,7 @@ fn corrupted_store_is_reported_not_silently_ignored() {
 fn version_mismatch_is_rejected() {
     let home = temp_home("version");
     use_test_passphrase();
-    std::env::set_var("ODQUOTA_HOME", &home);
-    let store = Store::resolve().expect("resolve store");
+    let store = Store::with_path(home.join("accounts.dat"));
 
     // Write a document that claims a future version; loading must refuse it
     // rather than silently parsing fields it does not understand.
@@ -189,8 +183,7 @@ fn version_mismatch_is_rejected() {
 fn empty_file_is_treated_as_first_run() {
     let home = temp_home("zero");
     use_test_passphrase();
-    std::env::set_var("ODQUOTA_HOME", &home);
-    let store = Store::resolve().expect("resolve store");
+    let store = Store::with_path(home.join("accounts.dat"));
     fs::write(store.path(), b"").expect("write empty file");
 
     let doc = store.load().expect("empty file is not corruption");
@@ -203,8 +196,7 @@ fn empty_file_is_treated_as_first_run() {
 fn store_lives_under_odquota_home_not_appdata() {
     let home = temp_home("home");
     use_test_passphrase();
-    std::env::set_var("ODQUOTA_HOME", &home);
-    let store = Store::resolve().expect("resolve store");
+    let store = Store::with_path(home.join("accounts.dat"));
     assert_eq!(store.path(), home.join("accounts.dat"));
     let _ = fs::remove_dir_all(&home);
 }
