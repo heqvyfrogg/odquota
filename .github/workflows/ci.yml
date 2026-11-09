@@ -84,9 +84,6 @@ jobs:
           chmod +x "${{ matrix.artifact }}"
           mkdir -p dist
           tar -czf "dist/${{ matrix.archive }}" -C . "${{ matrix.artifact }}" README.md LICENSE
-          # Record the checksum against the archive name alone, so a reader can
-          # run `sha256sum -c` from the download directory without editing it.
-          (cd dist && sha256sum "${{ matrix.archive }}" > "${{ matrix.archive }}.sha256")
       - name: Package (windows)
         if: runner.os == 'Windows'
         shell: pwsh
@@ -94,8 +91,6 @@ jobs:
           Copy-Item "target/${{ matrix.target }}/release/odquota.exe" "${{ matrix.artifact }}"
           New-Item -ItemType Directory -Force -Path dist | Out-Null
           Compress-Archive -Path "${{ matrix.artifact }}", "README.md", "LICENSE" -DestinationPath "dist/${{ matrix.archive }}"
-          $h = (Get-FileHash "dist/${{ matrix.archive }}" -Algorithm SHA256).Hash.ToLower()
-          "$h  ${{ matrix.archive }}" | Out-File -Encoding ascii "dist/${{ matrix.archive }}.sha256"
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.archive }}

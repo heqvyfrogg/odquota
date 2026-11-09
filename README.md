@@ -19,7 +19,16 @@ Open Design（Vela）のアカウント情報を **1 本の JSON** で返すネ�
 | macOS x86_64 | `odquota-x86_64-macos.tar.gz` |
 | macOS aarch64 | `odquota-aarch64-macos.tar.gz` |
 
-各アーカイブに `.sha256` が併載されている。取得後は `sha256sum -c`（macOS は `shasum -a 256 -c`）で照合できる。
+アセットを開くと GitHub が各ファイルの `sha256:` ダイジェストを表示する。手元の値と見比べればよく、追加のファイルを落とす必要はない。
+
+コマンドで照合したい場合は、リリースの API から同じダイジェストを取れる。
+
+```
+gh release view v0.1.1 --repo heqvyfrogg/odquota --json assets \
+  --jq '.assets[] | "\(.digest)  \(.name)"'
+```
+
+`sha256sum -c` を使いたい場合は、その出力を `sha256sum` 形式に直す（`sha256:` の接頭辞を外す）だけでよい。
 
 ## ビルド
 
